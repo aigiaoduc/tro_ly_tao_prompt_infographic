@@ -4,7 +4,7 @@ interface ApiKeyManagerProps {
   onClose: () => void;
 }
 
-const ApiKeyManager: React.FC<ApiKeyManagerProps> = ({ onClose }) => {
+const ApiKeyManager: React.FC<ApiKeyManagerProps> = () => {
   return null;
 };
 
