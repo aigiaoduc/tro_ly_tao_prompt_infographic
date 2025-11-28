@@ -172,8 +172,40 @@ const App: React.FC = () => {
 
   const handleModalCopy = async () => {
     if (viewingHistoryItem) {
-      await navigator.clipboard.writeText(viewingHistoryItem.prompt);
-      setModalCopied(true);
+      const textToCopy = viewingHistoryItem.prompt;
+      try {
+        // Cách 1: Clipboard API
+        await navigator.clipboard.writeText(textToCopy);
+        setModalCopied(true);
+      } catch (err) {
+        // Cách 2: Fallback
+        try {
+          const textArea = document.createElement("textarea");
+          textArea.value = textToCopy;
+          
+          textArea.style.position = "fixed";
+          textArea.style.left = "-9999px";
+          textArea.style.top = "0";
+          
+          document.body.appendChild(textArea);
+          textArea.focus();
+          textArea.select();
+          
+          const successful = document.execCommand('copy');
+          document.body.removeChild(textArea);
+          
+          if (successful) {
+            setModalCopied(true);
+          } else {
+            alert("Không thể tự động sao chép. Vui lòng bôi đen và nhấn Ctrl+C.");
+          }
+        } catch (fallbackErr) {
+          console.error('Copy failed', fallbackErr);
+        }
+      }
+      
+      // Reset trạng thái copied sau 2s
+      if (modalCopied) return; // Nếu đã true thì effect sẽ lo việc reset
       setTimeout(() => setModalCopied(false), 2000);
     }
   };

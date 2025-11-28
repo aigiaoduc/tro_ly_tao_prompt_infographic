@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Copy, Check, Terminal } from 'lucide-react';
 
@@ -17,8 +18,40 @@ const PromptDisplay: React.FC<PromptDisplayProps> = ({ prompt }) => {
   }, [copied]);
 
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(prompt);
-    setCopied(true);
+    if (!prompt) return;
+
+    try {
+      // Cách 1: Sử dụng Clipboard API hiện đại (Yêu cầu HTTPS)
+      await navigator.clipboard.writeText(prompt);
+      setCopied(true);
+    } catch (err) {
+      // Cách 2: Fallback cho trình duyệt cũ hoặc lỗi bảo mật
+      try {
+        const textArea = document.createElement("textarea");
+        textArea.value = prompt;
+        
+        // Đảm bảo textarea không hiển thị làm vỡ giao diện
+        textArea.style.position = "fixed";
+        textArea.style.left = "-9999px";
+        textArea.style.top = "0";
+        
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        
+        const successful = document.execCommand('copy');
+        document.body.removeChild(textArea);
+        
+        if (successful) {
+          setCopied(true);
+        } else {
+          alert("Không thể tự động sao chép. Vui lòng bôi đen và nhấn Ctrl+C.");
+        }
+      } catch (fallbackErr) {
+        console.error('Copy failed', fallbackErr);
+        alert("Lỗi sao chép: " + fallbackErr);
+      }
+    }
   };
 
   if (!prompt) return null;
